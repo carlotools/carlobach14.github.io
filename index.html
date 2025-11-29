@@ -78,7 +78,12 @@
     padding: 20px;
     border-radius: 10px;
     margin-bottom: 20px;
-    box-shadow: 0 0 10px #0ff;
+    box-shadow: 0 0 12px #0ff;
+    transition: 0.2s;
+  }
+
+  .tool:hover {
+    box-shadow: 0 0 20px #0ff;
   }
 
   .active {
@@ -138,11 +143,11 @@
   <h2>Carlo Tools</h2>
   <button class="menu-btn" onclick="openTool('ip')">🔍 IP Lookup</button>
   <button class="menu-btn" onclick="openTool('discord')">💠 Discord ID</button>
-  <button class="menu-btn" onclick="openTool('tiktok')">🎵 TikTok Lookup</button>
   <button class="menu-btn" onclick="openTool('randomip')">🎲 Random IP</button>
   <button class="menu-btn" onclick="openTool('hash')">🔐 Hash Generator</button>
   <button class="menu-btn" onclick="openTool('base64')">🗂️ Base64 Encode/Decode</button>
   <button class="menu-btn" onclick="openTool('device')">📱 Device Info</button>
+  <button class="menu-btn" onclick="openTool('urlscan')">🌐 URL Scanner</button>
   <button class="menu-btn" onclick="openTool('color')">🎨 Custom Colour</button>
 </div>
 
@@ -162,14 +167,6 @@
     <input id="discordInput" placeholder="Enter Discord ID">
     <button onclick="lookupDiscord()">Lookup</button>
     <div id="discordResult"></div>
-  </div>
-
-  <!-- TikTok Lookup -->
-  <div id="tiktok" class="tool">
-    <h1>TikTok User Lookup</h1>
-    <input id="tiktokInput" placeholder="Enter TikTok Username">
-    <button onclick="lookupTikTok()">Lookup</button>
-    <div id="tiktokResult"></div>
   </div>
 
   <!-- Random IP -->
@@ -204,6 +201,14 @@
     <pre id="dev"></pre>
   </div>
 
+  <!-- URL Scanner -->
+  <div id="urlscan" class="tool">
+    <h1>URL Scanner</h1>
+    <input id="urlInput" placeholder="Enter URL to scan">
+    <button onclick="scanURL()">Scan URL</button>
+    <div id="urlResult"></div>
+  </div>
+
   <!-- Custom Colour -->
   <div id="color" class="tool">
     <h1>Custom Colour</h1>
@@ -225,11 +230,9 @@ async function lookupIP() {
   let ip = document.getElementById("ipInput").value;
   let out = document.getElementById("ipResult");
   out.innerHTML = "Fetching...";
-
   try {
     let res = await fetch(`https://ipapi.co/${ip}/json`);
     let data = await res.json();
-
     out.innerHTML = `
       <p>IP: ${data.ip}</p>
       <p>City: ${data.city}</p>
@@ -247,42 +250,15 @@ function lookupDiscord() {
   const id = document.getElementById("discordInput").value;
   const out = document.getElementById("discordResult");
   out.innerHTML = "Fetching...";
-
   try {
     const timestamp = ((BigInt(id) >> 22n) + 1420070400000n);
     const date = new Date(Number(timestamp));
     out.innerHTML = `
       <p>ID: ${id}</p>
       <p>Created At: ${date.toUTCString()}</p>
-      <p>Epoch Timestamp: ${timestamp}</p>
     `;
   } catch {
     out.innerHTML = "Invalid ID.";
-  }
-}
-
-/* TikTok Lookup (public API) */
-async function lookupTikTok() {
-  const username = document.getElementById("tiktokInput").value;
-  const out = document.getElementById("tiktokResult");
-  out.innerHTML = "Fetching...";
-
-  try {
-    const res = await fetch(`https://www.tiktok.com/@${username}`);
-    if (!res.ok) throw new Error("User not found");
-    const text = await res.text();
-    const match = text.match(/"user":{"id":"(\d+)","uniqueId":"([^"]+)","nickname":"([^"]+)"/);
-    if (match) {
-      out.innerHTML = `
-        <p>Username: ${match[2]}</p>
-        <p>Display Name: ${match[3]}</p>
-        <p>User ID: ${match[1]}</p>
-      `;
-    } else {
-      out.innerHTML = "User not found or private.";
-    }
-  } catch {
-    out.innerHTML = "Error fetching TikTok data.";
   }
 }
 
@@ -331,6 +307,56 @@ function setColor() {
   });
 }
 
+/* URL Scanner */
+async function scanURL() {
+  const url = document.getElementById("urlInput").value;
+  const out = document.getElementById("urlResult");
+  out.innerHTML = "Scanning URL...";
+  
+  try {
+    // VirusTotal Scan
+    const vtRes = await fetch('https://www.virustotal.com/api/v3/urls', {
+      method: 'POST',
+      headers: {
+        'x-apikey': '151239d6cbacb266c01bea07a17c013d11fa15964e952c6f898af5db5b58a842',
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: `url=${encodeURIComponent(url)}`
+    });
+    const vtJson = await vtRes.json();
+    const vtId = vtJson.data.id;
+
+    const vtReportRes = await fetch(`https://www.virustotal.com/api/v3/analyses/${vtId}`, {
+      headers: {'x-apikey': '151239d6cbacb266c01bea07a17c013d11fa15964e952c6f898af5db5b58a842'}
+    });
+    const vtReport = await vtReportRes.json();
+
+    // URLScan.io quick submit (public, requires API key)
+    const usRes = await fetch('https://urlscan.io/api/v1/scan/', {
+      method: 'POST',
+      headers: {
+        'API-Key': '01979773-6197-75d6-a282-afd0506b78ec',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ url: url, public: 'on' })
+    });
+    const usJson = await usRes.json();
+
+    // Screenshot preview
+    const screenshotURL = `https://api.screenshotmachine.com/?key=a1438b&url=${encodeURIComponent(url)}&dimension=1024x768`;
+
+    // Output
+    out.innerHTML = `
+      <p>VirusTotal Scan ID: ${vtId}</p>
+      <p>URLScan UUID: ${usJson.uuid}</p>
+      <p><a href="${screenshotURL}" target="_blank">Preview Screenshot</a></p>
+      <iframe src="${screenshotURL}" width="100%" height="400px"></iframe>
+    `;
+  } catch (err) {
+    out.innerHTML = "Error scanning URL: " + err;
+  }
+}
+
 /* MATRIX ANIMATION */
 const canvas = document.getElementById('matrix');
 const ctx = canvas.getContext('2d');
@@ -362,4 +388,4 @@ window.addEventListener('resize', () => {
 </script>
 
 </body>
-</html>
+  </html>
