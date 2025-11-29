@@ -20,7 +20,7 @@ canvas#matrix {
 }
 /* SIDEBAR */
 #sidebar {
-  width: 240px;
+  width: 260px;
   background: rgba(0,0,0,0.85);
   height: 100vh;
   position: fixed;
@@ -31,7 +31,6 @@ canvas#matrix {
   display: flex;
   flex-direction: column;
   align-items: center;
-  overflow-y: auto;
 }
 #sidebar h2 {
   color: #0ff;
@@ -43,7 +42,7 @@ canvas#matrix {
   padding: 12px;
   margin: 6px 0;
   background: #111;
-  color: #0f0;
+  color: #0ff;
   border: 1px solid #0ff;
   border-radius: 6px;
   cursor: pointer;
@@ -83,7 +82,7 @@ canvas#matrix {
 }
 /* MAIN CONTAINER */
 #main {
-  margin-left: 260px;
+  margin-left: 280px;
   padding: 20px;
 }
 .tool {
@@ -98,8 +97,8 @@ canvas#matrix {
 .active { display: block; }
 input, button, textarea {
   background: #000;
-  color: #0f0;
-  border: 1px solid #0f0;
+  color: #0ff;
+  border: 1px solid #0ff;
   padding: 10px;
   margin: 6px 0;
   width: 95%;
@@ -132,7 +131,6 @@ ul li { margin: 8px 0; font-size: 18px; }
 </head>
 <body>
 <canvas id="matrix"></canvas>
-
 <button id="settingsBtn">⚙️ Settings</button>
 <div id="settingsPanel">
   <h3>Settings</h3>
@@ -153,6 +151,9 @@ ul li { margin: 8px 0; font-size: 18px; }
   <button class="menu-btn" onclick="openTool('weather')">🌦️ Weather</button>
   <button class="menu-btn" onclick="openTool('roast')">🔥 Roast Gen</button>
   <button class="menu-btn" onclick="openTool('morse')">• — Morse</button>
+  <button class="menu-btn" onclick="openTool('email')">✉️ Email Info</button>
+  <button class="menu-btn" onclick="openTool('username')">👤 Username Lookup</button>
+  <button class="menu-btn" onclick="openTool('whois')">🌐 Website Info</button>
 </div>
 
 <div id="main">
@@ -169,6 +170,9 @@ ul li { margin: 8px 0; font-size: 18px; }
       <li>🌦️ Weather Checker</li>
       <li>🔥 Roast Generator / Rizz</li>
       <li>• — Morse Encoder/Decoder</li>
+      <li>✉️ Email Info Checker</li>
+      <li>👤 Username Lookup</li>
+      <li>🌐 Website / WHOIS Info</li>
     </ul>
   </div>
 
@@ -252,6 +256,31 @@ ul li { margin: 8px 0; font-size: 18px; }
     <button onclick="decodeMorse()">Decode</button>
     <div id="morseOut"></div>
   </div>
+
+  <!-- Email Info -->
+  <div id="email" class="tool">
+    <h1>Email Info Checker</h1>
+    <input id="emailInput" placeholder="Enter Email">
+    <button onclick="lookupEmail()">Check</button>
+    <div id="emailResult"></div>
+  </div>
+
+  <!-- Username Lookup -->
+  <div id="username" class="tool">
+    <h1>Username Lookup</h1>
+    <input id="usernameInput" placeholder="Enter Username">
+    <button onclick="lookupUsername()">Check</button>
+    <div id="usernameResult"></div>
+  </div>
+
+  <!-- Website / WHOIS -->
+  <div id="whois" class="tool">
+    <h1>Website Info / WHOIS</h1>
+    <input id="domainInput" placeholder="Enter Domain (example.com)">
+    <button onclick="lookupDomain()">Check</button>
+    <div id="domainResult"></div>
+  </div>
+
 </div>
 
 <script>
@@ -363,7 +392,7 @@ function genRoast(){
 
 /* Morse */
 const MORSE={"A":".-","B":"-...","C":"-.-.","D":"-..","E":".","F":"..-.","G":"--.","H":"....","I":"..","J":".---","K":"-.-","L":".-..","M":"--","N":"-.","O":"---","P":".--.","Q":"--.-","R":".-.","S":"...","T":"-","U":"..-","V":"...-","W":".--","X":"-..-","Y":"-.--","Z":"--..","1":".----","2":"..---","3":"...--","4":"....-","5":".....","6":"-....","7":"--...","8":"---..","9":"----.","0":"-----"};
-function encodeMorse(){
+function encodeMorse(){   
   let t=document.getElementById("morseIn").value.toUpperCase();
   document.getElementById("morseOut").innerText=t.split("").map(c=>MORSE[c]||c).join(" ");
 }
@@ -373,29 +402,15 @@ function decodeMorse(){
   document.getElementById("morseOut").innerText=t.map(c=>inv[c]||"?").join("");
 }
 
-/* MATRIX BACKGROUND */
-const canvas=document.getElementById("matrix"),ctx=canvas.getContext("2d");
-canvas.width=window.innerWidth;canvas.height=window.innerHeight;
-let cols=Math.floor(canvas.width/20),drops=Array(cols).fill(1);
-function matrix(){
-  ctx.fillStyle="rgba(0,0,0,0.05)";
-  ctx.fillRect(0,0,canvas.width,canvas.height);
-  ctx.fillStyle="#0f0";
-  ctx.font="20px monospace";
-  drops.forEach((y,i)=>{
-    let text=String.fromCharCode(0x30A0+Math.random()*96);
-    ctx.fillText(text,i*20,y*20);
-    if(y*20>canvas.height && Math.random()>0.9)drops[i]=0;
-    drops[i]++;
-  });
-}
-setInterval(matrix,50);
-window.addEventListener("resize",()=>{
-  canvas.width=window.innerWidth;
-  canvas.height=window.innerHeight;
-  cols=Math.floor(canvas.width/20);
-  drops=Array(cols).fill(1);
-});
-</script>
-</body>
-</html>
+/* New OSINT Tools */
+/* Email Info */
+async function lookupEmail(){
+  let email=document.getElementById("emailInput").value;
+  let out=document.getElementById("emailResult");
+  out.innerHTML="Fetching...";
+  try{
+    let r=await fetch(`https://api.apilayer.com/email_verification/check?email=${email}`, {
+      headers: { "apikey":"demo" } // replace with real key
+    });
+    let j=await r.json();
+    out.innerHTML=`<p>Email
