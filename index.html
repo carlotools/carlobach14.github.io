@@ -13,7 +13,6 @@
     overflow-x: hidden;
   }
 
-  /* MATRIX BACKGROUND */
   canvas#matrix {
     position: fixed;
     top: 0;
@@ -21,7 +20,6 @@
     z-index: -1;
   }
 
-  /* SIDEBAR */
   #sidebar {
     width: 240px;
     background: rgba(0,0,0,0.85);
@@ -65,7 +63,6 @@
     box-shadow: 0 0 8px #0ff;
   }
 
-  /* MAIN CONTENT */
   #main {
     margin-left: 260px;
     padding: 20px;
@@ -111,7 +108,6 @@
     width: 150px;
   }
 
-  /* Responsive */
   @media screen and (max-width: 768px) {
     #sidebar {
       width: 100%;
@@ -219,7 +215,6 @@
 </div>
 
 <script>
-/* Side menu function */
 function openTool(id) {
   document.querySelectorAll('.tool').forEach(t => t.classList.remove('active'));
   document.getElementById(id).classList.add('active');
@@ -282,14 +277,8 @@ async function doHash(type) {
 }
 
 /* Base64 */
-function b64Encode() {
-  const txt = document.getElementById("b64In").value;
-  document.getElementById("b64Out").innerText = btoa(txt);
-}
-function b64Decode() {
-  const txt = document.getElementById("b64In").value;
-  document.getElementById("b64Out").innerText = atob(txt);
-}
+function b64Encode() { document.getElementById("b64Out").innerText = btoa(document.getElementById("b64In").value); }
+function b64Decode() { document.getElementById("b64Out").innerText = atob(document.getElementById("b64In").value); }
 
 /* Device info */
 document.getElementById("dev").innerText = JSON.stringify({
@@ -302,58 +291,48 @@ document.getElementById("dev").innerText = JSON.stringify({
 function setColor() {
   const c = document.getElementById("colorPicker").value;
   document.body.style.color = c;
-  document.querySelectorAll("*").forEach(el => {
-    if (el.style.border) el.style.borderColor = c;
-  });
+  document.querySelectorAll("*").forEach(el => { if (el.style.border) el.style.borderColor = c; });
 }
 
-/* URL Scanner */
+/* 🌐 NEW SAFE URL SCANNER */
 async function scanURL() {
   const url = document.getElementById("urlInput").value;
   const out = document.getElementById("urlResult");
-  out.innerHTML = "Scanning URL...";
-  
+  out.innerHTML = "Scanning...";
+
+  const enc = encodeURIComponent(url);
+
   try {
-    // VirusTotal Scan
-    const vtRes = await fetch('https://www.virustotal.com/api/v3/urls', {
-      method: 'POST',
-      headers: {
-        'x-apikey': '151239d6cbacb266c01bea07a17c013d11fa15964e952c6f898af5db5b58a842',
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: `url=${encodeURIComponent(url)}`
-    });
-    const vtJson = await vtRes.json();
-    const vtId = vtJson.data.id;
+    // 1. IPQualityScore keyless demo
+    const ipqs = await fetch(
+      `https://ipqualityscore.com/api/json/url/UDyTqEo1cW1l7zQ0RdBpvg/${enc}`
+    ).then(r => r.json());
 
-    const vtReportRes = await fetch(`https://www.virustotal.com/api/v3/analyses/${vtId}`, {
-      headers: {'x-apikey': '151239d6cbacb266c01bea07a17c013d11fa15964e952c6f898af5db5b58a842'}
-    });
-    const vtReport = await vtReportRes.json();
+    // 2. Header resolver (CORS bypass)
+    const head = await fetch("https://api.allorigins.win/get?url=" + enc)
+      .then(r => r.json());
 
-    // URLScan.io quick submit (public, requires API key)
-    const usRes = await fetch('https://urlscan.io/api/v1/scan/', {
-      method: 'POST',
-      headers: {
-        'API-Key': '01979773-6197-75d6-a282-afd0506b78ec',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ url: url, public: 'on' })
-    });
-    const usJson = await usRes.json();
+    // 3. Screenshot preview (keyless)
+    const screenshot = `https://api.screenshotmachine.com/?key=free&url=${enc}&dimension=1024x768`;
 
-    // Screenshot preview
-    const screenshotURL = `https://api.screenshotmachine.com/?key=a1438b&url=${encodeURIComponent(url)}&dimension=1024x768`;
-
-    // Output
     out.innerHTML = `
-      <p>VirusTotal Scan ID: ${vtId}</p>
-      <p>URLScan UUID: ${usJson.uuid}</p>
-      <p><a href="${screenshotURL}" target="_blank">Preview Screenshot</a></p>
-      <iframe src="${screenshotURL}" width="100%" height="400px"></iframe>
+      <h3>🔍 Scan Results</h3>
+      <p><b>URL:</b> ${url}</p>
+
+      <h4>🛡️ IPQualityScore</h4>
+      <p>Risk Score: ${ipqs.risk_score}</p>
+      <p>Malicious: ${ipqs.malicious}</p>
+      <p>Phishing: ${ipqs.phishing}</p>
+      <p>Suspicious: ${ipqs.suspicious}</p>
+
+      <h4>📡 URL Headers / Redirects</h4>
+      <pre>${head.contents ? "Fetched Successfully" : "No Preview"}</pre>
+
+      <h4>🖼️ Screenshot Preview</h4>
+      <iframe src="${screenshot}" width="100%" height="400px"></iframe>
     `;
   } catch (err) {
-    out.innerHTML = "Error scanning URL: " + err;
+    out.innerHTML = "Error: " + err;
   }
 }
 
@@ -388,4 +367,4 @@ window.addEventListener('resize', () => {
 </script>
 
 </body>
-  </html>
+</html>
