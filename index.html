@@ -129,8 +129,8 @@ ul li { margin: 8px 0; font-size: 18px; }
 </style>  
 </head>  
 <body>  
-<canvas id="matrix"></canvas>  
-<button id="settingsBtn">⚙️ Settings</button>  
+<canvas id="matrix"></canvas>  <button id="settingsBtn">⚙️ Settings</button>
+
 <div id="settingsPanel">  
   <h3>Settings</h3>  
   <p>Glow / Border Colour:</p>  
@@ -148,7 +148,6 @@ ul li { margin: 8px 0; font-size: 18px; }
   <button class="menu-btn" onclick="openTool('weather')">🌦️ Weather</button>  
   <button class="menu-btn" onclick="openTool('roast')">🔥 Roast Gen</button>  
   <button class="menu-btn" onclick="openTool('morse')">• — Morse</button>  
-  <button class="menu-btn" onclick="openTool('email')">✉️ Email Info</button>  
   <button class="menu-btn" onclick="openTool('username')">👤 Username Lookup</button>  
   <button class="menu-btn" onclick="openTool('whois')">🌐 Website Info</button>  
 </div>  <div id="main">  
@@ -165,7 +164,6 @@ ul li { margin: 8px 0; font-size: 18px; }
       <li>🌦️ Weather Checker</li>  
       <li>🔥 Roast Generator / Rizz</li>  
       <li>• — Morse Encoder/Decoder</li>  
-      <li>✉️ Email Info Checker</li>  
       <li>👤 Username Lookup</li>  
       <li>🌐 Website / WHOIS Info</li>  
     </ul>  
@@ -190,7 +188,7 @@ ul li { margin: 8px 0; font-size: 18px; }
     <button onclick="doHash('SHA-1')">SHA1</button>  
     <button onclick="doHash('MD5')">MD5</button>  
     <div id="hashOut"></div>  
-  </div>  <!-- Base64 -->    <div id="base64" class="tool">  
+  </div>    <!-- Base64 -->    <div id="base64" class="tool">  
     <h1>Base64 Encode / Decode</h1>  
     <textarea id="b64In" rows="4"></textarea>  
     <button onclick="b64Encode()">Encode</button>  
@@ -220,11 +218,6 @@ ul li { margin: 8px 0; font-size: 18px; }
     <button onclick="encodeMorse()">Encode</button>  
     <button onclick="decodeMorse()">Decode</button>  
     <div id="morseOut"></div>  
-  </div>    <!-- Email Info -->    <div id="email" class="tool">  
-    <h1>Email Info Checker</h1>  
-    <input id="emailInput" placeholder="Enter Email">  
-    <button onclick="lookupEmail()">Check</button>  
-    <div id="emailResult"></div>  
   </div>    <!-- Username Lookup -->    <div id="username" class="tool">  
     <h1>Username Lookup</h1>  
     <input id="usernameInput" placeholder="Enter Username">  
@@ -235,7 +228,29 @@ ul li { margin: 8px 0; font-size: 18px; }
     <input id="domainInput" placeholder="Enter Domain (example.com)">  
     <button onclick="lookupDomain()">Check</button>  
     <div id="domainResult"></div>  
-  </div>  </div>  <script>  
+  </div>  
+</div>  <script>  
+/* Matrix Background */  
+const canvas = document.getElementById('matrix');  
+const ctx = canvas.getContext('2d');  
+canvas.width = window.innerWidth;  
+canvas.height = window.innerHeight;  
+const cols = Math.floor(canvas.width / 20);  
+const ypos = Array(cols).fill(0);  
+  
+function matrix() {  
+  ctx.fillStyle = 'rgba(0,0,0,0.1)';  
+  ctx.fillRect(0, 0, canvas.width, canvas.height);  
+  ctx.fillStyle = '#0f0';  
+  ctx.font = '16px monospace';  
+  ypos.forEach((y, ind) => {  
+    const text = String.fromCharCode(Math.random() * 128);  
+    ctx.fillText(text, ind * 20, y);  
+    ypos[ind] = y > canvas.height + Math.random() * 10000 ? 0 : y + 20;  
+  });  
+}  
+setInterval(matrix, 50);  
+  
 /* Tool navigation */  
 function openTool(id){  
   document.querySelectorAll(".tool").forEach(a=>a.classList.remove("active"));  
@@ -250,10 +265,10 @@ document.getElementById("settingsBtn").onclick = ()=>{
 document.getElementById("colorPicker").onchange = e=>{  
   let col = e.target.value;  
   document.body.style.color = col;  
-  document.querySelectorAll("*").forEach(el=>{if(el.style.borderColor)el.style.borderColor=col;});  
+  document.querySelectorAll("*").forEach(el=>{if(el.style.borderColor) el.style.borderColor=col;});  
 };  
   
-/* IP Lookup */  
+/* IP Lookup with more details */  
 async function lookupIP(){  
   let ip=document.getElementById("ipInput").value;  
   let out=document.getElementById("ipResult");  
@@ -261,12 +276,20 @@ async function lookupIP(){
   try{  
     let r=await fetch(`https://ipapi.co/${ip}/json`);  
     let j=await r.json();  
-    out.innerHTML=`<p>IP: ${j.ip}</p>  
-                   <p>City: ${j.city}</p>  
-                   <p>Region: ${j.region}</p>  
-                   <p>Country: ${j.country_name}</p>  
-                   <p>Org: ${j.org}</p>`;  
-  }catch{ out.innerHTML="Error fetching IP."; }  
+    out.innerHTML=`  
+      <p><strong>IP:</strong> ${j.ip}</p>  
+      <p><strong>City:</strong> ${j.city}</p>  
+      <p><strong>Region:</strong> ${j.region}</p>  
+      <p><strong>Country:</strong> ${j.country_name}</p>  
+      <p><strong>Org:</strong> ${j.org}</p>  
+      <p><strong>Latitude:</strong> ${j.latitude}</p>  
+      <p><strong>Longitude:</strong> ${j.longitude}</p>  
+      <p><strong>Timezone:</strong> ${j.timezone}</p>  
+      <p><strong>ASN:</strong> ${j.asn}</p>  
+    `;  
+  }catch{  
+    out.innerHTML="Error fetching IP.";  
+  }  
 }  
   
 /* Discord ID Lookup */  
@@ -278,7 +301,9 @@ function lookupDiscord(){
     const ts=((BigInt(id)>>22n)+1420070400000n);  
     const d=new Date(Number(ts));  
     out.innerHTML=`<p>ID: ${id}</p><p>Created At: ${d.toUTCString()}</p>`;  
-  }catch{ out.innerHTML="Invalid ID."; }  
+  }catch{  
+    out.innerHTML="Invalid ID.";  
+  }  
 }  
   
 /* Random IP */  
@@ -327,10 +352,10 @@ async function getWeather(){
   try{  
     let r=await fetch(`https://wttr.in/${city}?format=j1`);  
     let j=await r.json();  
-    out.innerHTML=`<p>Location: ${city}</p>  
-                   <p>Temp: ${j.current_condition[0].temp_C}°C</p>  
-                   <p>Feels Like: ${j.current_condition[0].FeelsLikeC}°C</p>  
-                   <p>Weather: ${j.current_condition[0].weatherDesc[0].value}</p>`;  
+    out.innerHTML=`<p><strong>Location:</strong> ${city}</p>  
+                   <p><strong>Temp:</strong> ${j.current_condition[0].temp_C}°C</p>  
+                   <p><strong>Feels Like:</strong> ${j.current_condition[0].FeelsLikeC}°C</p>  
+                   <p><strong>Weather:</strong> ${j.current_condition[0].weatherDesc[0].value}</p>`;  
   }catch{ out.innerHTML="Error fetching weather."; }  
 }  
   
@@ -344,55 +369,53 @@ function genRoast(){
   
 /* Morse */  
 const MORSE={"A":".-","B":"-...","C":"-.-.","D":"-..","E":".","F":"..-.","G":"--.","H":"....","I":"..","J":".---","K":"-.-","L":".-..","M":"--","N":"-.","O":"---","P":".--.","Q":"--.-","R":".-.","S":"...","T":"-","U":"..-","V":"...-","W":".--","X":"-..-","Y":"-.--","Z":"--..","1":".----","2":"..---","3":"...--","4":"....-","5":".....","6":"-....","7":"--...","8":"---..","9":"----.","0":"-----"};  
-function encodeMorse(){     
+function encodeMorse(){  
   let t=document.getElementById("morseIn").value.toUpperCase();  
   document.getElementById("morseOut").innerText=t.split("").map(c=>MORSE[c]||c).join(" ");  
 }  
 function decodeMorse(){  
   let t=document.getElementById("morseIn").value.trim().split(" ");  
-  let inv=Object.fromEntries(Object.entries(MORSE).map(([k,v])=>[v,k]));  
-  document.getElementById("morseOut").innerText=t.map(c=>inv[c]||"?").join("");  
+  let inv = {};  
+for (let k in MORSE) { inv[MORSE[k]] = k; }  
+  
+function decodeMorse(){  
+  let t = document.getElementById("morseIn").value.trim().split(" ");  
+  let result = t.map(c => inv[c] || c).join("");  
+  document.getElementById("morseOut").innerText = result;  
 }  
   
-/* Email Info */  
-async function lookupEmail(){  
-  let email=document.getElementById("emailInput").value;  
-  let out=document.getElementById("emailResult");  
-  out.innerHTML="Fetching...";  
-  try{  
-    let r=await fetch(`https://api.apilayer.com/email_verification/check?email=${email}`, {  
-      headers: { "apikey":"demo" } // replace with real key  
-    });  
-    let j=await r.json();  
-    out.innerHTML=`<p>Email: ${j.email}</p>  
-                     <p>Valid: ${j.format_valid}</p>  
-                     <p>MX Found: ${j.mx_found}</p>  
-                     <p>SMTP Check: ${j.smtp_check}</p>`;  
-  }catch{ out.innerHTML="Error fetching email info."; }  
+/* Username Lookup (fake example, replace with real API if needed) */  
+function lookupUsername(){  
+  let username = document.getElementById("usernameInput").value;  
+  let out = document.getElementById("usernameResult");  
+  out.innerHTML = `Fetching info for <strong>${username}</strong>...`;  
+  // Example placeholder data  
+  setTimeout(() => {  
+    out.innerHTML = `<p>Username: ${username}</p>  
+                     <p>Status: Active</p>  
+                     <p>Created: ${new Date().toDateString()}</p>`;  
+  }, 500);  
 }  
   
-/* Username Lookup */  
-async function lookupUsername(){  
-  let u=document.getElementById("usernameInput").value;  
-  let out=document.getElementById("usernameResult");  
-  out.innerHTML="Fetching...";  
-  try{  
-    // placeholder API for username lookup  
-    out.innerHTML=`<p>Username: ${u}</p><p>Info: Not available</p>`;  
-  }catch{ out.innerHTML="Error fetching username info."; }  
-}  
-  
-/* Domain / WHOIS */  
+/* Domain / WHOIS Lookup (example using public API) */  
 async function lookupDomain(){  
-  let d=document.getElementById("domainInput").value;  
-  let out=document.getElementById("domainResult");  
-  out.innerHTML="Fetching...";  
-  try{  
-    let r=await fetch(`https://api.domainsdb.info/v1/domains/search?domain=${d}`);  
-    let j=await r.json();  
-    out.innerHTML=`<p>Domain: ${d}</p>  
-                     <p>Count: ${j.total || 0}</p>`;  
-  }catch{ out.innerHTML="Error fetching domain info."; }  
+  let domain = document.getElementById("domainInput").value;  
+  let out = document.getElementById("domainResult");  
+  out.innerHTML = "Fetching...";  
+  try {  
+    let r = await fetch(`https://api.domainsdb.info/v1/domains/search?domain=${domain}`);  
+    let j = await r.json();  
+    if (j.domains && j.domains.length > 0) {  
+      out.innerHTML = `<p>Domain: ${j.domains[0].domain}</p>  
+                       <p>Country: ${j.domains[0].country || 'N/A'}</p>  
+                       <p>Create Date: ${j.domains[0].create_date || 'N/A'}</p>  
+                       <p>Update Date: ${j.domains[0].update_date || 'N/A'}</p>`;  
+    } else {  
+      out.innerHTML = "No data found.";  
+    }  
+  } catch {  
+    out.innerHTML = "Error fetching domain info.";  
+  }  
 }  
 </script>  </body>  
-</html> 
+</html>
