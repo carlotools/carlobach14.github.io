@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Carlo Tools</title>
+
 <style>
   body {
     margin: 0;
@@ -20,9 +21,10 @@
     z-index: -1;
   }
 
+  /* SIDEBAR */
   #sidebar {
     width: 240px;
-    background: rgba(0,0,0,0.85);
+    background: rgba(0, 0, 0, 0.85);
     height: 100vh;
     position: fixed;
     left: 0;
@@ -36,33 +38,55 @@
 
   #sidebar h2 {
     color: #0ff;
-    text-align: center;
     margin-bottom: 20px;
     text-shadow: 0 0 12px #0ff;
-    font-size: 1.5em;
   }
 
   .menu-btn {
-    display: block;
     width: 90%;
     padding: 12px;
     margin: 6px 0;
     background: #111;
     color: #0ff;
     border: 1px solid #0ff;
+    border-radius: 6px;
     cursor: pointer;
     text-align: left;
-    border-radius: 6px;
-    transition: 0.2s;
   }
 
   .menu-btn:hover {
     background: #0ff;
     color: black;
     font-weight: bold;
-    box-shadow: 0 0 8px #0ff;
   }
 
+  /* SETTINGS BUTTON */
+  #settingsBtn {
+    position: fixed;
+    right: 20px;
+    top: 20px;
+    cursor: pointer;
+    font-size: 20px;
+    background: #111;
+    border: 1px solid #0ff;
+    padding: 10px;
+    color: #0ff;
+    border-radius: 8px;
+  }
+
+  #settingsPanel {
+    display: none;
+    position: fixed;
+    right: 20px;
+    top: 70px;
+    background: rgba(0,0,0,0.9);
+    padding: 20px;
+    border: 2px solid #0ff;
+    border-radius: 10px;
+    width: 220px;
+  }
+
+  /* MAIN CONTAINER */
   #main {
     margin-left: 260px;
     padding: 20px;
@@ -76,16 +100,9 @@
     border-radius: 10px;
     margin-bottom: 20px;
     box-shadow: 0 0 12px #0ff;
-    transition: 0.2s;
   }
 
-  .tool:hover {
-    box-shadow: 0 0 20px #0ff;
-  }
-
-  .active {
-    display: block;
-  }
+  .active { display: block; }
 
   input, button, textarea {
     background: #000;
@@ -104,9 +121,7 @@
     font-weight: bold;
   }
 
-  #colorPicker {
-    width: 150px;
-  }
+  #colorPicker { width: 100%; }
 
   @media screen and (max-width: 768px) {
     #sidebar {
@@ -115,19 +130,14 @@
       position: relative;
       border-right: none;
       border-bottom: 2px solid #0ff;
-      flex-direction: row;
+      display: flex;
       flex-wrap: wrap;
       justify-content: center;
     }
 
-    #main {
-      margin-left: 0;
-    }
+    .menu-btn { width: 45%; }
 
-    .menu-btn {
-      width: 45%;
-      margin: 6px;
-    }
+    #main { margin-left: 0; }
   }
 </style>
 </head>
@@ -135,22 +145,44 @@
 
 <canvas id="matrix"></canvas>
 
+<!-- SETTINGS BUTTON -->
+<button id="settingsBtn">⚙️ Settings</button>
+
+<!-- SETTINGS PANEL -->
+<div id="settingsPanel">
+  <h3>Settings</h3>
+  <p>Glow Colour:</p>
+  <input type="color" id="colorPicker">
+</div>
+
+<!-- SIDEBAR -->
 <div id="sidebar">
   <h2>Carlo Tools</h2>
+
+  <button class="menu-btn" onclick="openTool('home')">🏠 Home</button>
   <button class="menu-btn" onclick="openTool('ip')">🔍 IP Lookup</button>
   <button class="menu-btn" onclick="openTool('discord')">💠 Discord ID</button>
   <button class="menu-btn" onclick="openTool('randomip')">🎲 Random IP</button>
-  <button class="menu-btn" onclick="openTool('hash')">🔐 Hash Generator</button>
-  <button class="menu-btn" onclick="openTool('base64')">🗂️ Base64 Encode/Decode</button>
+  <button class="menu-btn" onclick="openTool('hash')">🔐 Hash Gen</button>
+  <button class="menu-btn" onclick="openTool('base64')">🗂️ Base64</button>
   <button class="menu-btn" onclick="openTool('device')">📱 Device Info</button>
   <button class="menu-btn" onclick="openTool('verse')">📖 Bible Verse</button>
-  <button class="menu-btn" onclick="openTool('color')">🎨 Custom Colour</button>
+  <button class="menu-btn" onclick="openTool('weather')">🌦️ Weather</button>
+  <button class="menu-btn" onclick="openTool('roast')">🔥 Roast Gen</button>
+  <button class="menu-btn" onclick="openTool('morse')">• — Morse</button>
 </div>
 
+<!-- MAIN -->
 <div id="main">
 
+  <!-- HOME -->
+  <div id="home" class="tool active">
+    <h1>Welcome to Carlo Tools</h1>
+    <p>The ultimate hacker-styled toolkit with real working utilities.</p>
+  </div>
+
   <!-- IP Lookup -->
-  <div id="ip" class="tool active">
+  <div id="ip" class="tool">
     <h1>IP Lookup</h1>
     <input id="ipInput" placeholder="Enter IP...">
     <button onclick="lookupIP()">Lookup</button>
@@ -176,16 +208,16 @@
   <div id="hash" class="tool">
     <h1>Hash Generator</h1>
     <input id="hashIn" placeholder="Text to hash">
-    <button onclick="doHash('MD5')">MD5</button>
-    <button onclick="doHash('SHA-1')">SHA1</button>
     <button onclick="doHash('SHA-256')">SHA256</button>
+    <button onclick="doHash('SHA-1')">SHA1</button>
+    <button onclick="doHash('MD5')">MD5</button>
     <div id="hashOut"></div>
   </div>
 
   <!-- Base64 -->
   <div id="base64" class="tool">
     <h1>Base64 Encode / Decode</h1>
-    <textarea id="b64In" rows="4" placeholder="Enter text"></textarea><br>
+    <textarea id="b64In" rows="4"></textarea>
     <button onclick="b64Encode()">Encode</button>
     <button onclick="b64Decode()">Decode</button>
     <div id="b64Out"></div>
@@ -193,32 +225,63 @@
 
   <!-- Device Info -->
   <div id="device" class="tool">
-    <h1>Device Info</h1>
+    <h1>Your Device Info</h1>
     <pre id="dev"></pre>
   </div>
 
-  <!-- Bible Verse Lookup -->
+  <!-- Bible Verse -->
   <div id="verse" class="tool">
     <h1>Bible Verse Lookup</h1>
-    <input id="verseInput" placeholder="Enter verse (e.g., John 3:16)">
-    <button onclick="lookupVerse()">Lookup Verse</button>
+    <input id="verseInput">
+    <button onclick="lookupVerse()">Search</button>
     <div id="verseResult"></div>
   </div>
 
-  <!-- Custom Colour -->
-  <div id="color" class="tool">
-    <h1>Custom Colour</h1>
-    <p>Select site glow colour:</p>
-    <input type="color" id="colorPicker" onchange="setColor()">
+  <!-- Weather -->
+  <div id="weather" class="tool">
+    <h1>Weather Checker</h1>
+    <input id="weatherInput" placeholder="Enter city">
+    <button onclick="getWeather()">Check</button>
+    <div id="weatherOut"></div>
+  </div>
+
+  <!-- Roast Generator -->
+  <div id="roast" class="tool">
+    <h1>Roast Generator</h1>
+    <input id="roastInput" placeholder="Describe the person">
+    <button onclick="genRoast()">Roast</button>
+    <div id="roastOut"></div>
+  </div>
+
+  <!-- Morse -->
+  <div id="morse" class="tool">
+    <h1>Morse Encoder/Decoder</h1>
+    <textarea id="morseIn" rows="3" placeholder="Enter text or morse"></textarea>
+    <button onclick="encodeMorse()">Encode</button>
+    <button onclick="decodeMorse()">Decode</button>
+    <div id="morseOut"></div>
   </div>
 
 </div>
 
 <script>
 function openTool(id) {
-  document.querySelectorAll('.tool').forEach(t => t.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+  document.querySelectorAll(".tool").forEach(a => a.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
 }
+
+/* SETTINGS PANEL */
+document.getElementById("settingsBtn").onclick = () => {
+  let s = document.getElementById("settingsPanel");
+  s.style.display = s.style.display === "block" ? "none" : "block";
+};
+
+document.getElementById("colorPicker").onchange = (e) => {
+  document.body.style.color = e.target.value;
+  document.querySelectorAll("*").forEach(el => {
+    if (el.style.borderColor) el.style.borderColor = e.target.value;
+  });
+};
 
 /* IP Lookup */
 async function lookupIP() {
@@ -226,32 +289,29 @@ async function lookupIP() {
   let out = document.getElementById("ipResult");
   out.innerHTML = "Fetching...";
   try {
-    let res = await fetch(`https://ipapi.co/${ip}/json`);
-    let data = await res.json();
+    let r = await fetch(`https://ipapi.co/${ip}/json`);
+    let j = await r.json();
     out.innerHTML = `
-      <p>IP: ${data.ip}</p>
-      <p>City: ${data.city}</p>
-      <p>Region: ${data.region}</p>
-      <p>Country: ${data.country_name}</p>
-      <p>Org: ${data.org}</p>
+      <p>IP: ${j.ip}</p>
+      <p>City: ${j.city}</p>
+      <p>Region: ${j.region}</p>
+      <p>Country: ${j.country_name}</p>
+      <p>Org: ${j.org}</p>
     `;
   } catch {
     out.innerHTML = "Error fetching IP.";
   }
 }
 
-/* Discord ID Lookup */
+/* Discord */
 function lookupDiscord() {
   const id = document.getElementById("discordInput").value;
   const out = document.getElementById("discordResult");
-  out.innerHTML = "Fetching...";
+  out.innerHTML = "Processing...";
   try {
-    const timestamp = ((BigInt(id) >> 22n) + 1420070400000n);
-    const date = new Date(Number(timestamp));
-    out.innerHTML = `
-      <p>ID: ${id}</p>
-      <p>Created At: ${date.toUTCString()}</p>
-    `;
+    const ts = ((BigInt(id) >> 22n) + 1420070400000n);
+    const d = new Date(Number(ts));
+    out.innerHTML = `<p>ID: ${id}</p><p>Created At: ${d.toUTCString()}</p>`;
   } catch {
     out.innerHTML = "Invalid ID.";
   }
@@ -259,100 +319,119 @@ function lookupDiscord() {
 
 /* Random IP */
 function genIP() {
-  const ip = `${rand()}${rand()}${rand()}${rand()}`.replace(/\.$/, "");
+  const ip = Array(4).fill(0).map(() => Math.floor(Math.random()*256)).join(".");
   document.getElementById("rip").innerText = ip;
 }
-function rand() {
-  return Math.floor(Math.random() * 256) + ".";
-}
 
-/* Hash Generator */
+/* Hash */
 async function doHash(type) {
-  const text = document.getElementById("hashIn").value;
-  const encoder = new TextEncoder();
-  const data = encoder.encode(text);
-  const hash = await crypto.subtle.digest(type.replace("-", ""), data);
-  const hex = Array.from(new Uint8Array(hash)).map(b=>b.toString(16).padStart(2,"0")).join("");
-  document.getElementById("hashOut").innerText = `${type}: ${hex}`;
+  const t = document.getElementById("hashIn").value;
+  const data = new TextEncoder().encode(t);
+  const hash = await crypto.subtle.digest(type, data);
+  const hex = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,"0")).join("");
+  document.getElementById("hashOut").innerText = hex;
 }
 
 /* Base64 */
 function b64Encode() { document.getElementById("b64Out").innerText = btoa(document.getElementById("b64In").value); }
 function b64Decode() { document.getElementById("b64Out").innerText = atob(document.getElementById("b64In").value); }
 
-/* Device info */
+/* Device Info */
 document.getElementById("dev").innerText = JSON.stringify({
   userAgent: navigator.userAgent,
   platform: navigator.platform,
   language: navigator.language
 }, null, 2);
 
-/* Colour customizer */
-function setColor() {
-  const c = document.getElementById("colorPicker").value;
-  document.body.style.color = c;
-  document.querySelectorAll("*").forEach(el => { if (el.style.border) el.style.borderColor = c; });
-}
-
-/* 📖 Bible Verse Lookup */
+/* Bible Verse */
 async function lookupVerse() {
-  const verse = document.getElementById("verseInput").value.trim();
-  const out = document.getElementById("verseResult");
+  let v = document.getElementById("verseInput").value;
+  let out = document.getElementById("verseResult");
+  out.innerHTML = "Fetching...";
+  let r = await fetch(`https://bible-api.com/${encodeURIComponent(v)}`);
+  let j = await r.json();
+  out.innerHTML = j.text ? `<h4>${j.reference}</h4><p>${j.text}</p>` : "Not found.";
+}
 
-  if (!verse) {
-    out.innerHTML = "Please enter a verse.";
-    return;
-  }
-
-  out.innerHTML = "Fetching verse...";
-
+/* Weather */
+async function getWeather() {
+  let city = document.getElementById("weatherInput").value;
+  let out = document.getElementById("weatherOut");
+  out.innerHTML = "Fetching...";
   try {
-    // Using bible-api.com (no API key)
-    const res = await fetch(`https://bible-api.com/${encodeURIComponent(verse)}`);
-    const data = await res.json();
-
-    if (data.text) {
-      out.innerHTML = `
-        <h4>${data.reference}</h4>
-        <p>${data.text}</p>
-      `;
-    } else {
-      out.innerHTML = "Verse not found.";
-    }
-  } catch (err) {
-    out.innerHTML = "Error fetching verse: " + err;
+    let r = await fetch(`https://wttr.in/${city}?format=j1`);
+    let j = await r.json();
+    out.innerHTML = `
+      <p>Location: ${city}</p>
+      <p>Temp: ${j.current_condition[0].temp_C}°C</p>
+      <p>Feels Like: ${j.current_condition[0].FeelsLikeC}°C</p>
+      <p>Weather: ${j.current_condition[0].weatherDesc[0].value}</p>
+    `;
+  } catch {
+    out.innerHTML = "Error.";
   }
 }
 
-/* MATRIX ANIMATION */
-const canvas = document.getElementById('matrix');
-const ctx = canvas.getContext('2d');
-let w = canvas.width = window.innerWidth;
-let h = canvas.height = window.innerHeight;
-let cols = Math.floor(w / 20);
-let drops = Array(cols).fill(1);
+/* Roast Generator */
+const roasts = [
+  "Bro looks like WiFi dropped when God rendered him.",
+  "If brains were money, you'd be in debt.",
+  "You’re not stupid, you just have bad luck thinking.",
+  "You have the confidence of a broken USB.",
+  "Bro typed that with his forehead."
+];
+function genRoast() {
+  let desc = document.getElementById("roastInput").value;
+  let r = roasts[Math.floor(Math.random()*roasts.length)];
+  document.getElementById("roastOut").innerText = `${desc}? ${r}`;
+}
 
-setInterval(() => {
-  ctx.fillStyle = 'rgba(0,0,0,0.05)';
-  ctx.fillRect(0,0,w,h);
-  ctx.fillStyle = '#0f0';
-  ctx.font = '20px monospace';
+/* Morse */
+const MORSE = {
+  "A":".-","B":"-...","C":"-.-.","D":"-..","E":".","F":"..-.","G":"--.","H":"....","I":"..","J":".---",
+  "K":"-.-","L":".-..","M":"--","N":"-.","O":"---","P":".--.","Q":"--.-","R":".-.","S":"...","T":"-",
+  "U":"..-","V":"...-","W":".--","X":"-..-","Y":"-.--","Z":"--..","1":".----","2":"..---","3":"...--",
+  "4":"....-","5":".....","6":"-....","7":"--...","8":"---..","9":"----.","0":"-----"
+};
 
-  drops.forEach((y, i) => {
-    const text = String.fromCharCode(0x30A0 + Math.random() * 96);
+function encodeMorse() {
+  let t = document.getElementById("morseIn").value.toUpperCase();
+  let out = t.split("").map(ch => MORSE[ch] || ch).join(" ");
+  document.getElementById("morseOut").innerText = out;
+}
+
+function decodeMorse() {
+  let t = document.getElementById("morseIn").value.trim().split(" ");
+  let inv = Object.fromEntries(Object.entries(MORSE).map(([k,v]) => [v,k]));
+  let out = t.map(code => inv[code] || "?").join("");
+  document.getElementById("morseOut").innerText = out;
+}
+
+/* MATRIX BACKGROUND */
+const canvas = document.getElementById("matrix");
+const ctx = canvas.getContext("2d");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const cols = Math.floor(canvas.width / 20);
+const drops = Array(cols).fill(1);
+
+function matrix() {
+  ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle = "#0f0";
+  ctx.font = "20px monospace";
+
+  drops.forEach((y,i)=>{
+    let text = String.fromCharCode(0x30A0 + Math.random()*96);
     ctx.fillText(text, i*20, y*20);
-    if (y*20 > h && Math.random() > 0.9) drops[i] = 0;
+    if (y*20 > canvas.height && Math.random() > 0.9) drops[i] = 0;
     drops[i]++;
   });
-}, 50);
+}
 
-window.addEventListener('resize', () => {
-  w = canvas.width = window.innerWidth;
-  h = canvas.height = window.innerHeight;
-  cols = Math.floor(w / 20);
-  drops = Array(cols).fill(1);
-});
+setInterval(matrix, 50);
 </script>
 
 </body>
-</html>
+  </html>
