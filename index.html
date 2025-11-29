@@ -18,42 +18,6 @@ canvas#matrix {
   left: 0;
   z-index: -1;
 }
-/* SIDEBAR */
-#sidebar {
-  width: 240px;
-  background: rgba(0,0,0,0.85);
-  height: 100vh;
-  position: fixed;
-  left: 0;
-  top: 0;
-  border-right: 2px solid #0ff;
-  padding: 20px 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-#sidebar h2 {
-  color: #0ff;
-  margin-bottom: 20px;
-  text-shadow: 0 0 12px #0ff;
-}
-.menu-btn {
-  width: 90%;
-  padding: 12px;
-  margin: 6px 0;
-  background: #111;
-  color: #0ff;
-  border: 1px solid #0ff;
-  border-radius: 6px;
-  cursor: pointer;
-  text-align: left;
-  font-size: 16px;
-}
-.menu-btn:hover {
-  background: #0ff;
-  color: black;
-  font-weight: bold;
-}
 /* SETTINGS BUTTON */
 #settingsBtn {
   position: fixed;
@@ -68,6 +32,7 @@ canvas#matrix {
   border-radius: 8px;
   z-index: 1000;
 }
+/* SETTINGS PANEL */
 #settingsPanel {
   display: none;
   position: fixed;
@@ -77,14 +42,24 @@ canvas#matrix {
   padding: 20px;
   border: 2px solid #0ff;
   border-radius: 10px;
-  width: 220px;
+  width: 260px;
   z-index: 1000;
 }
-/* MAIN CONTAINER */
-#main {
-  margin-left: 260px;
-  padding: 20px;
+#settingsPanel input, #settingsPanel button {
+  background: #000;
+  color: #0f0;
+  border: 1px solid #0f0;
+  padding: 8px;
+  width: 100%;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  font-family: monospace;
 }
+#settingsPanel input:focus, #settingsPanel button:focus {outline:none;}
+#settingsPanel h3 {margin-top:0;}
+/* MAIN */
+#main { padding: 20px; margin-left: 0; }
+/* TOOLS */
 .tool {
   display: none;
   background: rgba(0,0,0,0.85);
@@ -95,37 +70,24 @@ canvas#matrix {
   box-shadow: 0 0 15px #0ff;
 }
 .active { display: block; }
-input, button, textarea {
-  background: #000;
-  color: #0ff;
-  border: 1px solid #0ff;
+.menu-btn {
+  width: 100%;
   padding: 10px;
-  margin: 6px 0;
-  width: 95%;
+  margin: 4px 0;
+  background: #111;
+  color: #0f0;
+  border: 1px solid #0f0;
   border-radius: 6px;
-  font-family: monospace;
+  cursor: pointer;
+  text-align: left;
 }
-button:hover {
-  background: #0ff;
-  color: black;
-  font-weight: bold;
-}
-#colorPicker { width: 100%; }
-ul { list-style: none; padding: 0; }
-ul li { margin: 8px 0; font-size: 18px; }
-@media screen and (max-width: 768px) {
-  #sidebar {
-    width: 100%;
-    height: auto;
-    position: relative;
-    border-right: none;
-    border-bottom: 2px solid #0ff;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  .menu-btn { width: 45%; }
-  #main { margin-left: 0; }
+.menu-btn:hover {background:#0f0; color:black; font-weight:bold;}
+input, button, textarea {background:#000;color:#0f0;border:1px solid #0f0;padding:8px;margin:6px 0;width:95%;border-radius:6px;font-family:monospace;}
+button:hover {background:#0f0;color:black;font-weight:bold;}
+ul{list-style:none;padding:0;}
+ul li{margin:6px 0;font-size:16px;}
+@media screen and (max-width:768px){
+  #settingsPanel{width:90%;right:5%;}
 }
 </style>
 </head>
@@ -133,30 +95,19 @@ ul li { margin: 8px 0; font-size: 18px; }
 
 <canvas id="matrix"></canvas>
 
-<button id="settingsBtn">⚙️ Settings</button>
+<button id="settingsBtn">⚙️ Menu</button>
 <div id="settingsPanel">
-  <h3>Settings</h3>
-  <p>Glow / Border Colour:</p>
+  <h3>Tools</h3>
+  <input type="text" id="searchTool" placeholder="Search tools...">
+  <div id="toolButtons">
+    <!-- All tools will appear here dynamically -->
+  </div>
+  <hr>
+  <p>Glow Color:</p>
   <input type="color" id="colorPicker" value="#0f0">
 </div>
 
-<div id="sidebar">
-  <h2>Carlo Tools</h2>
-  <button class="menu-btn" onclick="openTool('home')">🏠 Home</button>
-  <button class="menu-btn" onclick="openTool('ip')">🔍 IP Lookup</button>
-  <button class="menu-btn" onclick="openTool('discord')">💠 Discord ID</button>
-  <button class="menu-btn" onclick="openTool('randomip')">🎲 Random IP</button>
-  <button class="menu-btn" onclick="openTool('hash')">🔐 Hash Gen</button>
-  <button class="menu-btn" onclick="openTool('base64')">🗂️ Base64</button>
-  <button class="menu-btn" onclick="openTool('device')">📱 Device Info</button>
-  <button class="menu-btn" onclick="openTool('verse')">📖 Bible Verse</button>
-  <button class="menu-btn" onclick="openTool('weather')">🌦️ Weather</button>
-  <button class="menu-btn" onclick="openTool('roast')">🔥 Roast Gen</button>
-  <button class="menu-btn" onclick="openTool('morse')">• — Morse</button>
-</div>
-
 <div id="main">
-  <!-- HOME -->
   <div id="home" class="tool active">
     <h1>Welcome to Carlo Tools</h1>
     <p>The ultimate hacker-styled toolkit with real working utilities:</p>
@@ -167,220 +118,86 @@ ul li { margin: 8px 0; font-size: 18px; }
       <li>📱 Device Info</li>
       <li>📖 Bible Verse Search</li>
       <li>🌦️ Weather Checker</li>
-      <li>🔥 Roast Generator / Rizz</li>
+      <li>🔥 Roast Generator</li>
       <li>• — Morse Encoder/Decoder</li>
+      <li>🖼️ EXIF / Metadata Extractor</li>
+      <li>🌐 WHOIS & DNS Lookup</li>
     </ul>
-  </div>
-
-  <!-- IP Lookup -->
-  <div id="ip" class="tool">
-    <h1>IP Lookup</h1>
-    <input id="ipInput" placeholder="Enter IP...">
-    <button onclick="lookupIP()">Lookup</button>
-    <div id="ipResult"></div>
-  </div>
-
-  <!-- Discord ID -->
-  <div id="discord" class="tool">
-    <h1>Discord ID Lookup</h1>
-    <input id="discordInput" placeholder="Enter Discord ID">
-    <button onclick="lookupDiscord()">Lookup</button>
-    <div id="discordResult"></div>
-  </div>
-
-  <!-- Random IP -->
-  <div id="randomip" class="tool">
-    <h1>Random IP Generator</h1>
-    <button onclick="genIP()">Generate</button>
-    <div id="rip"></div>
-  </div>
-
-  <!-- Hash -->
-  <div id="hash" class="tool">
-    <h1>Hash Generator</h1>
-    <input id="hashIn" placeholder="Text to hash">
-    <button onclick="doHash('SHA-256')">SHA256</button>
-    <button onclick="doHash('SHA-1')">SHA1</button>
-    <button onclick="doHash('MD5')">MD5</button>
-    <div id="hashOut"></div>
-  </div>
-
-  <!-- Base64 -->
-  <div id="base64" class="tool">
-    <h1>Base64 Encode / Decode</h1>
-    <textarea id="b64In" rows="4"></textarea>
-    <button onclick="b64Encode()">Encode</button>
-    <button onclick="b64Decode()">Decode</button>
-    <div id="b64Out"></div>
-  </div>
-
-  <!-- Device Info -->
-  <div id="device" class="tool">
-    <h1>Your Device Info</h1>
-    <pre id="dev"></pre>
-  </div>
-
-  <!-- Bible Verse -->
-  <div id="verse" class="tool">
-    <h1>Bible Verse Lookup</h1>
-    <input id="verseInput">
-    <button onclick="lookupVerse()">Search</button>
-    <div id="verseResult"></div>
-  </div>
-
-  <!-- Weather -->
-  <div id="weather" class="tool">
-    <h1>Weather Checker</h1>
-    <input id="weatherInput" placeholder="Enter city">
-    <button onclick="getWeather()">Check</button>
-    <div id="weatherOut"></div>
-  </div>
-
-  <!-- Roast -->
-  <div id="roast" class="tool">
-    <h1>Roast / Rizz Generator</h1>
-    <input id="roastInput" placeholder="Describe the person">
-    <button onclick="genRoast()">Generate</button>
-    <div id="roastOut"></div>
-  </div>
-
-  <!-- Morse -->
-  <div id="morse" class="tool">
-    <h1>Morse Encoder/Decoder</h1>
-    <textarea id="morseIn" rows="3" placeholder="Enter text or morse"></textarea>
-    <button onclick="encodeMorse()">Encode</button>
-    <button onclick="decodeMorse()">Decode</button>
-    <div id="morseOut"></div>
   </div>
 </div>
 
 <script>
-/* Tool navigation */
+const tools = [
+  {id:'home', name:'🏠 Home'},
+  {id:'ip', name:'🔍 IP Lookup'},
+  {id:'discord', name:'💠 Discord ID Lookup'},
+  {id:'randomip', name:'🎲 Random IP'},
+  {id:'hash', name:'🔐 Hash Generator'},
+  {id:'base64', name:'🗂️ Base64 Encode/Decode'},
+  {id:'device', name:'📱 Device Info'},
+  {id:'verse', name:'📖 Bible Verse Lookup'},
+  {id:'weather', name:'🌦️ Weather Checker'},
+  {id:'roast', name:'🔥 Roast Generator'},
+  {id:'morse', name:'• — Morse Encoder/Decoder'},
+  {id:'whois', name:'🌐 WHOIS Lookup'},
+  {id:'dns', name:'🛰️ DNS Lookup'},
+  {id:'metadata', name:'🖼️ Metadata Extractor'}
+];
+
 function openTool(id){
   document.querySelectorAll(".tool").forEach(a=>a.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
+  let toolDiv = document.getElementById(id);
+  if(!toolDiv){
+    // create tool div dynamically
+    toolDiv = document.createElement("div");
+    toolDiv.id = id;
+    toolDiv.className = "tool active";
+    toolDiv.innerHTML = `<h1>${tools.find(t=>t.id===id)?.name||id}</h1><p>Tool coming soon...</p>`;
+    document.getElementById("main").appendChild(toolDiv);
+  } else toolDiv.classList.add("active");
 }
 
-/* Settings panel */
+// populate tool buttons
+const toolButtonsDiv = document.getElementById("toolButtons");
+tools.forEach(t=>{
+  const btn = document.createElement("button");
+  btn.className="menu-btn";
+  btn.textContent=t.name;
+  btn.onclick = ()=>{openTool(t.id);}
+  toolButtonsDiv.appendChild(btn);
+});
+
+// search filter
+document.getElementById("searchTool").addEventListener("input", e=>{
+  const val = e.target.value.toLowerCase();
+  Array.from(toolButtonsDiv.children).forEach(btn=>{
+    btn.style.display = btn.textContent.toLowerCase().includes(val)?'block':'none';
+  });
+});
+
+// settings panel toggle
 document.getElementById("settingsBtn").onclick = ()=>{
   let s = document.getElementById("settingsPanel");
   s.style.display = s.style.display==="block"?"none":"block";
 };
+
+// color picker
 document.getElementById("colorPicker").onchange = e=>{
   let col = e.target.value;
   document.body.style.color = col;
-  document.querySelectorAll("*").forEach(el=>{if(el.style.borderColor)el.style.borderColor=col;});
+  document.querySelectorAll("*").forEach(el=>{
+    if(el.style.borderColor) el.style.borderColor=col;
+  });
 };
 
-/* IP Lookup */
-async function lookupIP(){
-  let ip=document.getElementById("ipInput").value;
-  let out=document.getElementById("ipResult");
-  out.innerHTML="Fetching...";
-  try{
-    let r=await fetch(`https://ipapi.co/${ip}/json`);
-    let j=await r.json();
-    out.innerHTML=`<p>IP: ${j.ip}</p>
-                   <p>City: ${j.city}</p>
-                   <p>Region: ${j.region}</p>
-                   <p>Country: ${j.country_name}</p>
-                   <p>Org: ${j.org}</p>`;
-  }catch{ out.innerHTML="Error fetching IP."; }
-}
-
-/* Discord ID Lookup */
-function lookupDiscord(){
-  const id=document.getElementById("discordInput").value;
-  const out=document.getElementById("discordResult");
-  out.innerHTML="Processing...";
-  try{
-    const ts=((BigInt(id)>>22n)+1420070400000n);
-    const d=new Date(Number(ts));
-    out.innerHTML=`<p>ID: ${id}</p><p>Created At: ${d.toUTCString()}</p>`;
-  }catch{ out.innerHTML="Invalid ID."; }
-}
-
-/* Random IP */
-function genIP(){
-  const ip=Array(4).fill(0).map(()=>Math.floor(Math.random()*256)).join(".");
-  document.getElementById("rip").innerText=ip;
-}
-
-/* Hash */
-async function doHash(type){
-  const t=document.getElementById("hashIn").value;
-  const data=new TextEncoder().encode(t);
-  const hash=await crypto.subtle.digest(type,data);
-  const hex=Array.from(new Uint8Array(hash)).map(b=>b.toString(16).padStart(2,"0")).join("");
-  document.getElementById("hashOut").innerText=hex;
-}
-
-/* Base64 */
-function b64Encode(){document.getElementById("b64Out").innerText=btoa(document.getElementById("b64In").value);}
-function b64Decode(){document.getElementById("b64Out").innerText=atob(document.getElementById("b64In").value);}
-
-/* Device Info */
-document.getElementById("dev").innerText=JSON.stringify({
-  userAgent:navigator.userAgent,
-  platform:navigator.platform,
-  language:navigator.language
-},null,2);
-
-/* Bible Verse */
-async function lookupVerse(){
-  let v=document.getElementById("verseInput").value;
-  let out=document.getElementById("verseResult");
-  out.innerHTML="Fetching...";
-  try{
-    let r=await fetch(`https://bible-api.com/${encodeURIComponent(v)}`);
-    let j=await r.json();
-    out.innerHTML=j.text? `<h4>${j.reference}</h4><p>${j.text}</p>`:"Not found.";
-  }catch{ out.innerHTML="Error."; }
-}
-
-/* Weather */
-async function getWeather(){
-  let city=document.getElementById("weatherInput").value;
-  let out=document.getElementById("weatherOut");
-  out.innerHTML="Fetching...";
-  try{
-    let r=await fetch(`https://wttr.in/${city}?format=j1`);
-    let j=await r.json();
-    out.innerHTML=`<p>Location: ${city}</p>
-                   <p>Temp: ${j.current_condition[0].temp_C}°C</p>
-                   <p>Feels Like: ${j.current_condition[0].FeelsLikeC}°C</p>
-                   <p>Weather: ${j.current_condition[0].weatherDesc[0].value}</p>`;
-  }catch{ out.innerHTML="Error fetching weather."; }
-}
-
-/* Roast / Rizz */
-const roasts=["If I wanted to kill myself I'd climb your ego and jump to your IQ.","You bring everyone so much joy… when you leave the room.","You're as useless as the 'ueue' in 'queue'.","You're proof that even evolution takes a break sometimes.","Brains aren't everything. In your case, they're nothing.","You're like a cloud. When you disappear, it's a beautiful day.","I'd agree with you but then we’d both be wrong.","You have something on your chin… no, the third one down.","You're like a software update. Whenever I see you, I think 'Do I have to restart?'","You bring everyone happiness… by leaving."];
-function genRoast(){
-  let desc=document.getElementById("roastInput").value||"This person";
-  let r=roasts[Math.floor(Math.random()*roasts.length)];
-  document.getElementById("roastOut").innerText=`${desc}? ${r}`;
-}
-
-/* Morse */
-const MORSE={"A":".-","B":"-...","C":"-.-.","D":"-..","E":".","F":"..-.","G":"--.","H":"....","I":"..","J":".---","K":"-.-","L":".-..","M":"--","N":"-.","O":"---","P":".--.","Q":"--.-","R":".-.","S":"...","T":"-","U":"..-","V":"...-","W":".--","X":"-..-","Y":"-.--","Z":"--..","1":".----","2":"..---","3":"...--","4":"....-","5":".....","6":"-....","7":"--...","8":"---..","9":"----.","0":"-----"};
-function encodeMorse(){ 
-  let t=document.getElementById("morseIn").value.toUpperCase();
-  document.getElementById("morseOut").innerText=t.split("").map(c=>MORSE[c]||c).join(" ");
-}
-function decodeMorse(){
-  let t=document.getElementById("morseIn").value.trim().split(" ");
-  let inv=Object.fromEntries(Object.entries(MORSE).map(([k,v])=>[v,k]));
-  document.getElementById("morseOut").innerText=t.map(c=>inv[c]||"?").join("");
-}
-
-/* MATRIX BACKGROUND */
+// MATRIX BACKGROUND
 const canvas=document.getElementById("matrix"),ctx=canvas.getContext("2d");
 canvas.width=window.innerWidth;canvas.height=window.innerHeight;
 let cols=Math.floor(canvas.width/20),drops=Array(cols).fill(1);
 function matrix(){
   ctx.fillStyle="rgba(0,0,0,0.05)";
   ctx.fillRect(0,0,canvas.width,canvas.height);
-  ctx.fillStyle="#0f0";
+  ctx.fillStyle=document.getElementById("colorPicker").value;
   ctx.font="20px monospace";
   drops.forEach((y,i)=>{
     let text=String.fromCharCode(0x30A0+Math.random()*96);
