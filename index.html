@@ -128,9 +128,8 @@ ul li { margin: 8px 0; font-size: 18px; }
 }  
 </style>  
 </head>  
-<body>  <canvas id="matrix"></canvas>
-
-<button id="settingsBtn">⚙️ Settings</button>
+<body>  
+<canvas id="matrix"></canvas>  <button id="settingsBtn">⚙️ Settings</button>
 
 <div id="settingsPanel">  
   <h3>Settings</h3>  
@@ -149,6 +148,7 @@ ul li { margin: 8px 0; font-size: 18px; }
   <button class="menu-btn" onclick="openTool('weather')">🌦️ Weather</button>  
   <button class="menu-btn" onclick="openTool('roast')">🔥 Roast Gen</button>  
   <button class="menu-btn" onclick="openTool('morse')">• — Morse</button>  
+  <button class="menu-btn" onclick="openTool('snapchat')">👻 Snapchat Lookup</button>  
 </div>  <div id="main">  
   <!-- HOME -->  
   <div id="home" class="tool active">  
@@ -163,6 +163,7 @@ ul li { margin: 8px 0; font-size: 18px; }
       <li>🌦️ Weather Checker</li>  
       <li>🔥 Roast Generator / Rizz</li>  
       <li>• — Morse Encoder/Decoder</li>  
+      <li>👻 Snapchat Username Lookup</li>  
     </ul>  
   </div>    <!-- IP Lookup -->    <div id="ip" class="tool">  
     <h1>IP Lookup</h1>  
@@ -215,6 +216,11 @@ ul li { margin: 8px 0; font-size: 18px; }
     <button onclick="encodeMorse()">Encode</button>  
     <button onclick="decodeMorse()">Decode</button>  
     <div id="morseOut"></div>  
+  </div>    <!-- Snapchat Lookup -->    <div id="snapchat" class="tool">  
+    <h1>Snapchat Username Lookup</h1>  
+    <input id="snapInput" placeholder="Enter Snapchat username">  
+    <button onclick="lookupSnap()">Lookup</button>  
+    <div id="snapResult"></div>  
   </div>  
 </div>  <script>  
 /* Tool navigation */  
@@ -325,7 +331,7 @@ function genRoast(){
   
 /* Morse */  
 const MORSE={"A":".-","B":"-...","C":"-.-.","D":"-..","E":".","F":"..-.","G":"--.","H":"....","I":"..","J":".---","K":"-.-","L":".-..","M":"--","N":"-.","O":"---","P":".--.","Q":"--.-","R":".-.","S":"...","T":"-","U":"..-","V":"...-","W":".--","X":"-..-","Y":"-.--","Z":"--..","1":".----","2":"..---","3":"...--","4":"....-","5":".....","6":"-....","7":"--...","8":"---..","9":"----.","0":"-----"};  
-function encodeMorse(){   
+function encodeMorse(){  
   let t=document.getElementById("morseIn").value.toUpperCase();  
   document.getElementById("morseOut").innerText=t.split("").map(c=>MORSE[c]||c).join(" ");  
 }  
@@ -333,6 +339,29 @@ function decodeMorse(){
   let t=document.getElementById("morseIn").value.trim().split(" ");  
   let inv=Object.fromEntries(Object.entries(MORSE).map(([k,v])=>[v,k]));  
   document.getElementById("morseOut").innerText=t.map(c=>inv[c]||"?").join("");  
+}  
+  
+/* Snapchat Lookup */  
+async function lookupSnap() {  
+  const username = document.getElementById("snapInput").value.trim();  
+  const out = document.getElementById("snapResult");  
+  if(!username) return out.innerHTML = "Enter a username.";  
+  out.innerHTML = "Fetching...";  
+  try {  
+    // Example public API: Snaplytics or other unofficial endpoints  
+    let res = await fetch(`https://api.smnova.dev/snapi/username/${encodeURIComponent(username)}`);  
+    let data = await res.json();  
+    if(data.error) {  
+      out.innerHTML = "Username not found.";  
+    } else {  
+      out.innerHTML = `<p>Username: ${data.username}</p>  
+                       <p>Display Name: ${data.display_name || "N/A"}</p>  
+                       <p>Private: ${data.private ? "Yes" : "No"}</p>  
+                       <p>Bitmoji: ${data.bitmoji ? "Yes" : "No"}</p>`;  
+    }  
+  } catch {  
+    out.innerHTML = "Error fetching Snapchat info.";  
+  }  
 }  
   
 /* MATRIX BACKGROUND */  
@@ -350,13 +379,15 @@ function matrix(){
     if(y*20>canvas.height && Math.random()>0.9)drops[i]=0;  
     drops[i]++;  
   });  
+  requestAnimationFrame(matrix);  
 }  
-setInterval(matrix,50);  
-window.addEventListener("resize",()=>{  
-  canvas.width=window.innerWidth;  
-  canvas.height=window.innerHeight;  
-  cols=Math.floor(canvas.width/20);  
-  drops=Array(cols).fill(1);  
+  
+/* Handle window resize */  
+window.addEventListener("resize", () => {  
+  canvas.width = window.innerWidth;  
+  canvas.height = window.innerHeight;  
+  cols = Math.floor(canvas.width / 20);  
+  drops = Array(cols).fill(1);  
 });  
 </script>  </body>  
 </html>
